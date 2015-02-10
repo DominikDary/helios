@@ -64,6 +64,7 @@ public class AgentParser extends ServiceParser {
   private Argument agentIdArg;
   private Argument dnsArg;
   private Argument bindArg;
+  private Argument listenerUrlArg;
 
   public AgentParser(final String... args) throws ArgumentParserException {
     super("helios-agent", "Spotify Helios Agent", args);
@@ -127,7 +128,8 @@ public class AgentParser extends ServiceParser {
         .setServiceRegistrarPlugin(getServiceRegistrarPlugin())
         .setAdminPort(options.getInt(adminArg.getDest()))
         .setHttpEndpoint(httpAddress)
-        .setNoHttp(options.getBoolean(noHttpArg.getDest()));
+        .setNoHttp(options.getBoolean(noHttpArg.getDest()))
+        .setListenerUrl(options.getString(listenerUrlArg.getDest()));
 
     final String explicitId = options.getString(agentIdArg.getDest());
     if (explicitId != null) {
@@ -212,6 +214,9 @@ public class AgentParser extends ServiceParser {
         .action(append())
         .setDefault(new ArrayList<String>())
         .help("volumes to bind to all containers");
+
+    listenerUrlArg = parser.addArgument("--listener-url")
+        .help("A URL to which agent will POST TaskStatusEvent JSON data.");
   }
 
   public AgentConfig getAgentConfig() {

@@ -90,6 +90,7 @@ public class Agent extends AbstractIdleService {
   private final PersistentAtomicReference<Map<JobId, Execution>> executions;
   private final PortAllocator portAllocator;
   private final Reaper reaper;
+  private final ExternalListener externalListener;
 
   /**
    * Create a new agent.
@@ -103,8 +104,25 @@ public class Agent extends AbstractIdleService {
   public Agent(final AgentModel model, final SupervisorFactory supervisorFactory,
                final ReactorFactory reactorFactory,
                final PersistentAtomicReference<Map<JobId, Execution>> executions,
+               final PortAllocator portAllocator, final Reaper reaper) {
+    this(model, supervisorFactory, reactorFactory, executions, portAllocator, reaper, null);
+  }
+
+  /**
+   * Create a new agent.
+   *
+   * @param model             The model.
+   * @param supervisorFactory The factory to use for creating supervisors.
+   * @param reactorFactory    The factory to use for creating reactors.
+   * @param executions        A persistent map of executions.
+   * @param portAllocator     Allocator for job ports.
+   * @param externalListener  A listener that will send data to an external URL.
+   */
+  public Agent(final AgentModel model, final SupervisorFactory supervisorFactory,
+               final ReactorFactory reactorFactory,
+               final PersistentAtomicReference<Map<JobId, Execution>> executions,
                final PortAllocator portAllocator,
-               final Reaper reaper) {
+               final Reaper reaper, final ExternalListener externalListener) {
     this.model = checkNotNull(model, "model");
     this.supervisorFactory = checkNotNull(supervisorFactory, "supervisorFactory");
     this.executions = checkNotNull(executions, "executions");
@@ -112,6 +130,7 @@ public class Agent extends AbstractIdleService {
     this.reactor = checkNotNull(reactorFactory.create("agent", new Update(), UPDATE_INTERVAL),
                                 "reactor");
     this.reaper = checkNotNull(reaper, "reaper");
+    this.externalListener = externalListener;
   }
 
   @Override
@@ -124,6 +143,9 @@ public class Agent extends AbstractIdleService {
       }
     }
     model.addListener(modelListener);
+    if (this.externalListener != null) {
+      model.addListener(this.externalListener);
+    }
     reactor.startAsync().awaitRunning();
     reactor.signal();
   }

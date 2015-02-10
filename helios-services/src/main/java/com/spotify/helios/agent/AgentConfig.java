@@ -23,12 +23,12 @@ package com.spotify.helios.agent;
 
 import com.spotify.helios.servicescommon.DockerHost;
 
-import io.dropwizard.Configuration;
-
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+
+import io.dropwizard.Configuration;
 
 /**
  * The configuration of the Helios agent.
@@ -60,6 +60,7 @@ public class AgentConfig extends Configuration {
   private InetSocketAddress httpEndpoint;
   private boolean noHttp;
   private List<String> binds;
+  private String listenerUrl;
 
   public boolean isInhibitMetrics() {
     return inhibitMetrics;
@@ -278,6 +279,15 @@ public class AgentConfig extends Configuration {
 
   public AgentConfig setBinds(List<String> binds) {
     this.binds = binds;
+    return this;
+  }
+
+  public String getListenerUrl() {
+    return listenerUrl;
+  }
+
+  public AgentConfig setListenerUrl(final String listenerUrl) {
+    this.listenerUrl = listenerUrl;
     return this;
   }
 }
